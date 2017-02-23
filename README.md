@@ -35,11 +35,9 @@ So you've got static library `libpath_nrm.a` and executable of tests `path_nrm_t
 Test suite: Intel Core i3 4160 (3.6GHz, 64K/256K/3072K caches), 16Gb RAM (no swap), Ubuntu 16.04 x64.
 
 ```
-Normalization of 1024 bytes string 100000 times consumed 2.670622 seconds [0.035710Gbps]
-Normalization of 2048 bytes string 100000 times consumed 5.186243 seconds [0.036777Gbps]
-Normalization of 33554432 bytes string 100 times consumed 88.122649 seconds [0.035462Gbps]
-Normalization of 50331647 bytes string 100 times consumed 132.354386 seconds [0.035416Gbps]
-Normalization of 134217726 bytes string 100 times consumed 355.552843 seconds [0.035157Gbps]
-Normalization of 268435454 bytes string 100 times consumed 723.847981 seconds [0.034538Gbps]
+Normalization of 128 bytes string consumed 0.000001 seconds [1.024000Gbps]
+Normalization of 1024 bytes string consumed 0.000003 seconds [2.730667Gbps]
+Normalization of 1048576 bytes string consumed 0.003299 seconds [2.542773Gbps]
+Normalization of 134217728 bytes string consumed 0.343688 seconds [3.124176Gbps]
+Normalization of 536870912 bytes string consumed 1.719848 seconds [2.497295Gbps]
 ```
-As can be seen from the above normalization speed is about 0.035Gbps per core.

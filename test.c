@@ -13,8 +13,7 @@ void assert_normalization(char* expected, char* path) {
     }
 
     if (strcmp(expected, result) != 0) {
-        fprintf(stderr, "Normalization of `%s` failed: expected `%s`, but actual `%s`", path, expected, result);
-        exit(1);
+        fprintf(stderr, "Normalization of `%s` failed: expected `%s`, but actual `%s`\n", path, expected, result);
     }
 
     free(result);
@@ -26,14 +25,14 @@ float frand() {
 
 char* gen_part() {
     float p = frand();
-    if (p <= 0.5) {
+    if (p <= 0.8) {
         return "x";
-    } else if (p > 0.5 && p <= 0.7) {
+    } else if (p > 0.8 && p <= 0.9) {
         return "/";
-    } else if (p > 0.7 && p <= 0.9) {
-        return "../";
+    } else if (p > 0.9 && p <= 0.98) {
+        return "/../";
     } else {
-        return "./";
+        return "/./";
     }
 }
 
@@ -51,51 +50,42 @@ char* generate_path(size_t max_len) {
     return path;
 }
 
-void performance_test(size_t path_len, size_t iter_num) {
+void performance_test(size_t path_len) {
     char* path = generate_path(path_len);
-    char* results[iter_num];
 
     clock_t start = clock();
     long i;
-    for (i = 0; i < iter_num; ++i) {
-        results[i] = normalize(path);
-    }
+    char *result = normalize(path);
 
     clock_t consumed = clock() - start;
     double consumed_sec = ((double) consumed) / CLOCKS_PER_SEC;
 
-    size_t len = strlen(path);
-    double speed = len * iter_num / consumed_sec / (1024 * 1024 * 1024);
-    printf("Normalization of %zu bytes string %zu times consumed %f seconds [%fGbps]\n", len, iter_num, consumed_sec, speed);
+    double speed = path_len / consumed_sec / (1000 * 1000 * 1000) * 8;   // gigabit
+    printf("Normalization of %zu bytes string consumed %f seconds [%fGbps]\n", path_len, consumed_sec, speed);
     fflush(stdout);
 
-    for (i = 0; i < iter_num; ++i) {
-        free(results[i]);
-    }
+    free(result);
 }
 
 int main() {
     assert_normalization(0, 0);
-    assert_normalization("", "");
-
+    assert_normalization("/", "");
     assert_normalization("/", "/");
-    assert_normalization("", ".");
+    assert_normalization("/", ".");
     assert_normalization("/", "..");
-    assert_normalization("", "./.");
+    assert_normalization("/", "./.");
     assert_normalization("/", "./..");
-
     assert_normalization("/bin", "../bin");
     assert_normalization("/bin", "../../bin");
     assert_normalization("/bin/bash", "/bin/bash");
-    assert_normalization("/bin/bash", "/bin//bash");
     assert_normalization("/var/local", "/var/lib/../local");
     assert_normalization("/var/lib/local", "/var/lib/./local");
     assert_normalization("/local", "/var/../../local");
+    assert_normalization("/usr", "home/root/.././user/../../../usr/.");
 
-    size_t lengths[] = {   1024,   2048, 32 * 1024 * 1024, 48 * 1024 * 1024, 128 * 1024 * 1024, 256 * 1024 * 1024 };
-    size_t iters[] =   { 100000, 100000,              100,              100,               100,               100 };
-    for (int i = 0; i < sizeof(lengths)/sizeof(*lengths); ++i) {
-        performance_test(lengths[i], iters[i]);
+    size_t chunk_sizes[] = {128, 1024, 1024 * 1024, 128 * 1024 * 1024, 512 * 1024 * 1024};
+    for (int i = 0; i < sizeof(chunk_sizes)/sizeof(*chunk_sizes); ++i) {
+        performance_test(chunk_sizes[i]);
     }
 
     return 0;
